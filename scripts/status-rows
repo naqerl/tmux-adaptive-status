@@ -1,0 +1,18 @@
+#!/bin/sh
+# Set the session status to one row or two from one client's width.
+# The argument is the hook client (a tty name). #{client_width} inside a hook
+# is the current client, which stays the desktop when the phone resizes.
+client=$1
+[ -n "$client" ] || exit 0
+cols=$(tmux show -gv @adaptive-status-cols 2>/dev/null) || cols=
+if [ -z "$cols" ]; then
+	cols=$(tmux show -gv @status_cols 2>/dev/null) || cols=
+fi
+[ -n "$cols" ] || cols=60
+width=$(tmux display-message -c "$client" -p '#{client_width}' 2>/dev/null) || exit 0
+[ -n "$width" ] || exit 0
+if [ "$width" -lt "$cols" ]; then
+	tmux set status 2
+else
+	tmux set status on
+fi
